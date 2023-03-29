@@ -267,6 +267,15 @@ def gesture_robot_select():
             if (left_arm_angle > 160) and (left_arm_angle < 180) and (d < (ref_d / 2.1)):
                 return "WAKE_UP"
 
+def gesture_left_right_bands():
+    d = distance_between_joints(JointNames.right_shoulder.value, JointNames.left_shoulder.value)
+    # print(all_landmarks[JointNames.right_shoulder.value][0] + (d/2))
+
+    if ((all_landmarks[JointNames.right_shoulder.value][0] + (d / 2)) > 0.01) and (all_landmarks[JointNames.right_shoulder.value][0] + (d / 2)) < 0.3:
+        return "OPERATOR_LEFT"
+    elif ((all_landmarks[JointNames.right_shoulder.value][0] + (d / 2)) > 0.6) and (all_landmarks[JointNames.right_shoulder.value][0] + (d / 2)) < 1.0:
+        return "OPERATOR_RIGHT"
+
 
 def processCameraData(image, udp_server, robot_ip_address):
     with mp_pose.Pose(
@@ -287,11 +296,13 @@ def processCameraData(image, udp_server, robot_ip_address):
         # Draw the pose annotation on the image
         image.flags.writeable = True
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        mp_drawing.draw_landmarks(
-            image,
-            results.pose_landmarks,
-            mp_pose.POSE_CONNECTIONS,
-            landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+
+        # Kreslenie
+        # mp_drawing.draw_landmarks(
+        #     image,
+        #     results.pose_landmarks,
+        #     mp_pose.POSE_CONNECTIONS,
+        #     landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
 
         if results.pose_landmarks:
             fill_pose(results.pose_landmarks)
@@ -325,6 +336,10 @@ def processCameraData(image, udp_server, robot_ip_address):
             command = command + "RIGHT"
         elif gesture_robot_select() == "WAKE_UP":
             command = command + "WAKE_UP"
+        elif gesture_left_right_bands() == "OPERATOR_LEFT":
+            command = command + "OPERATOR_LEFT"
+        elif gesture_left_right_bands() == "OPERATOR_RIGHT":
+            command = command + "OPERATOR_RIGHT"
         else:
             command = command + "NULL"
 
