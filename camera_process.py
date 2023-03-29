@@ -268,12 +268,16 @@ def gesture_robot_select():
                 return "WAKE_UP"
 
 def gesture_left_right_bands():
-    d = distance_between_joints(JointNames.right_shoulder.value, JointNames.left_shoulder.value)
+    d = distance_between_joints(JointNames.right_hip.value, JointNames.left_hip.value)
     # print(all_landmarks[JointNames.right_shoulder.value][0] + (d/2))
 
-    if ((all_landmarks[JointNames.right_shoulder.value][0] + (d / 2)) > 0.01) and (all_landmarks[JointNames.right_shoulder.value][0] + (d / 2)) < 0.3:
+    if (all_landmarks[JointNames.right_hip.value][0] + (d / 2)) == 0:
         return "OPERATOR_LEFT"
-    elif ((all_landmarks[JointNames.right_shoulder.value][0] + (d / 2)) > 0.6) and (all_landmarks[JointNames.right_shoulder.value][0] + (d / 2)) < 1.0:
+    elif ((all_landmarks[JointNames.right_hip.value][0] + (d / 2)) >= 0.3) and (all_landmarks[JointNames.right_hip.value][0] + (d / 2)) <= 0.6:
+        return "STOP"
+    elif ((all_landmarks[JointNames.right_hip.value][0] + (d / 2)) >= 0.0) and (all_landmarks[JointNames.right_hip.value][0] + (d / 2)) < 0.3:
+        return "OPERATOR_LEFT"
+    elif ((all_landmarks[JointNames.right_hip.value][0] + (d / 2)) > 0.6) and (all_landmarks[JointNames.right_hip.value][0] + (d / 2)) < 1.0:
         return "OPERATOR_RIGHT"
 
 
@@ -336,10 +340,14 @@ def processCameraData(image, udp_server, robot_ip_address):
             command = command + "RIGHT"
         elif gesture_robot_select() == "WAKE_UP":
             command = command + "WAKE_UP"
+        # najnizsia priorita
+        elif gesture_left_right_bands() == "STOP":
+            command = command + "STOP"
         elif gesture_left_right_bands() == "OPERATOR_LEFT":
             command = command + "OPERATOR_LEFT"
         elif gesture_left_right_bands() == "OPERATOR_RIGHT":
             command = command + "OPERATOR_RIGHT"
+
         else:
             command = command + "NULL"
 
