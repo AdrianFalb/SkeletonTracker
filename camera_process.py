@@ -281,6 +281,14 @@ def gesture_left_right_bands():
         return "OPERATOR_RIGHT"
 
 
+def gesture_follow_me():
+    d = distance_between_joints(JointNames.left_wrist_glob.value, JointNames.right_wrist_glob.value)
+    # print(d)
+
+    if (d < 0.05):
+        return "FOLLOW_OPERATOR"
+
+
 def processCameraData(image, udp_server, robot_ip_address):
     with mp_pose.Pose(
             min_detection_confidence=0.9,
@@ -330,6 +338,8 @@ def processCameraData(image, udp_server, robot_ip_address):
 
         if gesture_stop() == "STOP":
             command = command + "STOP"
+        elif gesture_robot_select() == "WAKE_UP":
+            command = command + "WAKE_UP"
         elif gesture_forward() == "FORWARD":
             command = command + "FORWARD"
         elif gesture_backwards() == "BACKWARD":
@@ -338,8 +348,8 @@ def processCameraData(image, udp_server, robot_ip_address):
             command = command + "LEFT"
         elif gesture_right() == "RIGHT":
             command = command + "RIGHT"
-        elif gesture_robot_select() == "WAKE_UP":
-            command = command + "WAKE_UP"
+        elif gesture_follow_me() == "FOLLOW_OPERATOR":
+            command = command + "FOLLOW_OPERATOR"
         # najnizsia priorita
         elif gesture_left_right_bands() == "STOP":
             command = command + "STOP"

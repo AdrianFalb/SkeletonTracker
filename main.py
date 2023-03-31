@@ -13,10 +13,11 @@ if __name__ == '__main__':
     # print(f"Name of the script      : {sys.argv[0]}")
     # print(f"Arguments of the script : {sys.argv[1:]}")
 
-    robot_ip_address = sys.argv[1]
-    server_udp_port = sys.argv[2]
-    # robot_ip_address = "192.168.1.13"
-    # server_udp_port = "23432"
+    # robot_ip_address = sys.argv[1]
+    # server_udp_port = sys.argv[2]
+
+    robot_ip_address = "192.168.1.13"
+    server_udp_port = "23432"
 
     udp_server = UdpServer(int(server_udp_port))
     # print("Port: " + str(sys.argv[2]))
@@ -24,8 +25,8 @@ if __name__ == '__main__':
 
     # ================================================================================ Threads
 
-    readThread = CamRead("http://" + str(robot_ip_address) + ":8000/stream.mjpg")
-    # readThread = CamRead(0)
+    # readThread = CamRead("http://" + str(robot_ip_address) + ":8000/stream.mjpg")
+    readThread = CamRead(0)
 
     readThread.start()
     time.sleep(2)
