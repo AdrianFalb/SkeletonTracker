@@ -142,8 +142,11 @@ def angle_between_joints(j1, j2, j3):
     magnitude1 = np.linalg.norm(v1)
     magnitude2 = np.linalg.norm(v2)
 
-    cosine_angle = dot_product / (magnitude1 * magnitude2)
-    return math.degrees(math.acos(cosine_angle))
+    if (magnitude1 * magnitude2) != 0:
+        cosine_angle = dot_product / (magnitude1 * magnitude2)
+        return math.degrees(math.acos(cosine_angle))
+    else:
+        return 0
 
 
 def gesture_forward():
@@ -182,7 +185,7 @@ def gesture_backwards():
             return "BACKWARD"
 
 
-def gesture_left():
+def gesture_right():
     left_arm_angle = angle_between_joints(JointNames.left_shoulder.value, JointNames.left_elbow.value,
                                           JointNames.left_wrist_glob.value)
 
@@ -194,10 +197,10 @@ def gesture_left():
                                JointNames.right_elbow.value) == 1):
         if ((left_arm_angle > 158) and (left_arm_angle < 180)) and (
                 (right_arm_angle > 25) and (right_arm_angle < 40)):
-            return "LEFT"
+            return "RIGHT"
 
 
-def gesture_right():
+def gesture_left():
     left_arm_angle = angle_between_joints(JointNames.left_shoulder.value, JointNames.left_elbow.value,
                                           JointNames.left_wrist_glob.value)
 
@@ -209,7 +212,7 @@ def gesture_right():
                                JointNames.right_elbow.value) == 2):
         if ((left_arm_angle > 25) and (left_arm_angle < 40)) and (
                 (right_arm_angle > 158) and (right_arm_angle < 180)):
-            return "RIGHT"
+            return "LEFT"
 
 
 def gesture_stop():
@@ -267,29 +270,69 @@ def gesture_robot_select():
             if (left_arm_angle > 160) and (left_arm_angle < 180) and (d < (ref_d / 2.1)):
                 return "WAKE_UP"
 
-def gesture_left_right_bands():
-    d = distance_between_joints(JointNames.right_hip.value, JointNames.left_hip.value)
-    # print(all_landmarks[JointNames.right_shoulder.value][0] + (d/2))
-
-    if (all_landmarks[JointNames.right_hip.value][0] + (d / 2)) == 0:
-        return "OPERATOR_LEFT"
-    elif ((all_landmarks[JointNames.right_hip.value][0] + (d / 2)) >= 0.3) and (all_landmarks[JointNames.right_hip.value][0] + (d / 2)) <= 0.6:
-        return "STOP"
-    elif ((all_landmarks[JointNames.right_hip.value][0] + (d / 2)) >= 0.0) and (all_landmarks[JointNames.right_hip.value][0] + (d / 2)) < 0.3:
-        return "OPERATOR_LEFT"
-    elif ((all_landmarks[JointNames.right_hip.value][0] + (d / 2)) > 0.6) and (all_landmarks[JointNames.right_hip.value][0] + (d / 2)) < 1.0:
-        return "OPERATOR_RIGHT"
-
 
 def gesture_follow_me():
     d = distance_between_joints(JointNames.left_wrist_glob.value, JointNames.right_wrist_glob.value)
     # print(d)
 
-    if (d < 0.05):
+    if (d <= 0.05 and d > 0.0):
         return "FOLLOW_OPERATOR"
+
+def gesture_follow_mode_bands():
+    # d = distance_between_joints(JointNames.right_shoulder.value, JointNames.left_shoulder.value)
+    point_x = (all_landmarks[JointNames.right_shoulder.value][0] + all_landmarks[JointNames.left_shoulder.value][0])/2
+    point_y = (all_landmarks[JointNames.right_shoulder.value][1] + all_landmarks[JointNames.right_shoulder.value][1])/2
+
+    print("X: " + str(point_x))
+    print("Y: " + str(point_y))
+
+    # IMAGE je flipped takze tieto polia budu naopak nez co je intuitivne
+    # ========================================================================
+    # Policka 1, 2, 3
+    if (point_y > 0) and (point_y < 0.2):  # y-ova suradnica
+
+        if (point_x > 0.0) and (point_x < 0.3): # x-ova suradnica
+            return "FOLLOW_BACKWARD_LEFT"
+        elif (point_x >= 0.3) and (point_x <= 0.7): # x-ova suradnica
+            return "FOLLOW_BACKWARD"
+        elif (point_x > 0.7) and (point_x < 1.0):  # x-ova suradnica
+            return "FOLLOW_BACKWARD_RIGHT"
+        else:
+            return "NULL"
+    # ========================================================================
+    # Policka 4, 5, 6
+    elif (point_y >= 0.2) and (point_y <= 0.5):  # y-ova suradnica
+
+        if (point_x > 0.0) and (point_x < 0.3): # x-ova suradnica
+            return "FOLLOW_LEFT"
+        elif (point_x >= 0.3) and (point_x <= 0.7): # x-ova suradnica
+            return "NULL"
+        elif (point_x > 0.7) and (point_x < 1.0):  # x-ova suradnica
+            return "FOLLOW_RIGHT"
+        else:
+            return "NULL"
+    # ========================================================================
+    # Policka 7, 8, 9
+    elif (point_y > 0.5) and (point_y < 1.0):  # y-ova suradnica
+
+        if (point_x > 0.0) and (point_x < 0.3):  # x-ova suradnica
+            return "FOLLOW_FORWARD_LEFT"
+        elif (point_x >= 0.3) and (point_x <= 0.7):  # x-ova suradnica
+            return "FOLLOW_FORWARD"
+        elif (point_x > 0.7) and (point_x < 1.0):  # x-ova suradnica
+            return "FOLLOW_FORWARD_RIGHT"
+        else:
+            return "NULL"
+    else:
+        return "FOLLOW_ROTATE"
 
 
 def processCameraData(image, udp_server, robot_ip_address):
+
+    image_height = image.shape[0]
+    image_width = image.shape[1]
+    image_channels = image.shape[2]
+
     with mp_pose.Pose(
             min_detection_confidence=0.9,
             min_tracking_confidence=0.9) as pose:  # , \
@@ -309,12 +352,12 @@ def processCameraData(image, udp_server, robot_ip_address):
         image.flags.writeable = True
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-        # Kreslenie
-        # mp_drawing.draw_landmarks(
-        #     image,
-        #     results.pose_landmarks,
-        #     mp_pose.POSE_CONNECTIONS,
-        #     landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+        # Kreslenie tela
+        mp_drawing.draw_landmarks(
+            image,
+            results.pose_landmarks,
+            mp_pose.POSE_CONNECTIONS,
+            landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
 
         if results.pose_landmarks:
             fill_pose(results.pose_landmarks)
@@ -335,6 +378,8 @@ def processCameraData(image, udp_server, robot_ip_address):
 
         robot = "ROBOT:" + robot_ip_address
         command = "COMMAND:"
+        out = "NULL"
+        out = gesture_follow_mode_bands()
 
         if gesture_stop() == "STOP":
             command = command + "STOP"
@@ -350,23 +395,27 @@ def processCameraData(image, udp_server, robot_ip_address):
             command = command + "RIGHT"
         elif gesture_follow_me() == "FOLLOW_OPERATOR":
             command = command + "FOLLOW_OPERATOR"
-        # najnizsia priorita
-        elif gesture_left_right_bands() == "STOP":
-            command = command + "STOP"
-        elif gesture_left_right_bands() == "OPERATOR_LEFT":
-            command = command + "OPERATOR_LEFT"
-        elif gesture_left_right_bands() == "OPERATOR_RIGHT":
-            command = command + "OPERATOR_RIGHT"
-
+        elif out != "NULL":
+            command = command + out
         else:
             command = command + "NULL"
 
         # print(command)
+
+        # Draw Lines into the camera frame
+        cv2.line(image, (int(image_width * 0.3), 0), (int(image_width * 0.3), image_height), (255, 255, 255)) # toto je vpravo
+        cv2.line(image, (int(image_width * 0.7), 0), (int(image_width * 0.7), image_height), (255, 255, 255)) # toto je vlavo
+        cv2.line(image, (0, int(image_height * 0.2)), (image_width, int(image_height * 0.2)), (255, 255, 255)) # toto je hore
+        cv2.line(image, (0, int(image_height * 0.5)), (image_width, int(image_height * 0.5)), (255, 255, 255)) # toto je dole
 
         if command != "COMMAND:NULL":
             message = robot + ";" + command
             udp_server.set_data(bytes(message.encode("utf-8")))
             print(udp_server.get_data())
             udp_server.send_message()
+            # Clear the message
+            command = ""
+            robot = ""
+            message = ""
 
         return image
