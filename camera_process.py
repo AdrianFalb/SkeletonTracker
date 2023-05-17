@@ -365,7 +365,12 @@ def gesture_follow_mode_bands():
         if (point_x > 0.0) and (point_x < 0.3):  # x-ova suradnica
             return "FOLLOW_FORWARD_LEFT"
         elif (point_x >= 0.3) and (point_x < 0.7):  # x-ova suradnica
-            return "FOLLOW_FORWARD"
+            if (point_y > 0.6) and (point_y < 0.8):
+                return "FOLLOW_FORWARD"
+            elif (point_y >= 0.8) and (point_y < 1):
+                return "FOLLOW_FORWARD_FAR"
+            else:
+                return "NULL"
         elif (point_x >= 0.7) and (point_x < 1.0):  # x-ova suradnica
             return "FOLLOW_FORWARD_RIGHT"
         else:
@@ -457,6 +462,7 @@ def processCameraData(image, udp_server, robot_ip_address):
         cv2.line(image, (int(image_width * 0.7), 0), (int(image_width * 0.7), image_height), (255, 255, 255))  # toto je vlavo
         cv2.line(image, (0, int(image_height * 0.3)), (image_width, int(image_height * 0.3)), (255, 255, 255))  # toto je hore
         cv2.line(image, (0, int(image_height * 0.6)), (image_width, int(image_height * 0.6)), (255, 255, 255))  # toto je dole
+        cv2.line(image, (int(image_width * 0.3), int(image_height * 0.8)), (int(image_width * 0.7), int(image_height * 0.8)), (255, 255, 255)) # toto deli dolne stredne pasmo na polovicu
 
         if (command != "COMMAND:NULL") or (follow_command != "FOLLOW_COMMAND:NULL"):
             message = robot + ";" + command + ";" + follow_command
