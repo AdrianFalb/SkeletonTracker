@@ -25,17 +25,17 @@ if __name__ == '__main__':
 
     # ================================================================================ Threads
 
-    readThread = CamRead("http://" + str(robot_ip_address) + ":8000/stream.mjpg")
-    # readThread = CamRead(0)
+    read_thread = CamRead("http://" + str(robot_ip_address) + ":8000/stream.mjpg")
+    # read_thread = CamRead(0)
 
-    readThread.start()
+    read_thread.start()
     time.sleep(2)
 
     while 1:
-        image = readThread.getFrame()
+        image = read_thread.get_frame()
 
         if image is not None or image != 0:
-            cv2.imshow("Camera", cv2.flip(camera_process.processCameraData(image, udp_server, robot_ip_address), 1))
+            cv2.imshow("Camera", cv2.flip(camera_process.process_camera_data(image, udp_server, robot_ip_address), 1))
             if cv2.waitKey(5) & 0xFF == 27:  # Close on ESC
-                readThread.exitCondition = True
+                read_thread.exit_condition = True
                 break

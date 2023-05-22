@@ -379,7 +379,7 @@ def gesture_follow_mode_bands():
         return "NULL"
 
 
-def processCameraData(image, udp_server, robot_ip_address):
+def process_camera_data(image, udp_server, robot_ip_address):
     global all_landmarks
     image_height = image.shape[0]
     image_width = image.shape[1]

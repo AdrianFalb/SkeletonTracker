@@ -9,27 +9,27 @@ class CamRead(threading.Thread):
     image2 = 0
     image3 = 0
 
-    exitCondition = False
+    exit_condition = False
 
     def __init__(self, cam_id):
         threading.Thread.__init__(self)
         self.cam_id = cam_id
-        self.lastImage = 0
+        self.last_image = 0
 
     def run(self):
-        self.cameraStart(self.cam_id)
+        self.camera_start(self.cam_id)
 
-    def getFrame(self):
-        if self.lastImage == 1:
+    def get_frame(self):
+        if self.last_image == 1:
             return self.image1
-        elif self.lastImage == 2:
+        elif self.last_image == 2:
             return self.image2
-        elif self.lastImage == 3:
+        elif self.last_image == 3:
             return self.image3
         else:
             return None
 
-    def cameraStart(self, cam_id):
+    def camera_start(self, cam_id):
         capture = cv2.VideoCapture(cam_id)
 
         if not capture.isOpened():
@@ -40,20 +40,20 @@ class CamRead(threading.Thread):
 
             while capture.isOpened():
 
-                if self.exitCondition:
+                if self.exit_condition:
                     break
 
-                if self.lastImage == 0 or self.lastImage == 3:
+                if self.last_image == 0 or self.last_image == 3:
                     success, self.image1 = capture.read()
-                    self.lastImage = 1
+                    self.last_image = 1
 
-                elif self.lastImage == 1:
+                elif self.last_image == 1:
                     success, self.image2 = capture.read()
-                    self.lastImage = 2
+                    self.last_image = 2
 
-                elif self.lastImage == 2:
+                elif self.last_image == 2:
                     success, self.image3 = capture.read()
-                    self.lastImage = 3
+                    self.last_image = 3
 
                 if not success:
                     print("Ignoring empty camera frame.")
