@@ -9,9 +9,6 @@ from udp_server import UdpServer
 from camera_read import CamRead
 
 if __name__ == '__main__':
-    # print("---- OpenCV version is: " + cv2.__version__ + " ----\n")
-    # print(f"Name of the script      : {sys.argv[0]}")
-    # print(f"Arguments of the script : {sys.argv[1:]}")
 
     robot_ip_address = sys.argv[1]
     server_udp_port = sys.argv[2]
@@ -20,8 +17,6 @@ if __name__ == '__main__':
     # server_udp_port = "23432"
 
     udp_server = UdpServer(int(server_udp_port))
-    # print("Port: " + str(sys.argv[2]))
-    # print("IP: " + str(sys.argv[1]))
 
     # ================================================================================ Threads
 
