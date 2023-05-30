@@ -17,4 +17,4 @@ The aim of this bachelor thesis is to explore the current state of the problem o
 
 
 This program of the designed human-machine interface is responsible for gesture recognition and sending commands to the main program responsible for controlling the mobile robots.
-The program responsible for robot control can be found here: https://github.com/AdrianFalb/demoRMR-all
+The program responsible for robot control can be found here: [https://github.com/AdrianFalb/robot-control](robot control)
